@@ -1,0 +1,391 @@
+Sample #1:
+Question: Who is the deputy prime minister of the country that encompasses Inagua National Park? 
+H-expression: JOIN [ Who is the deputy prime minister of the Ans#1 , What is country of Inagua National Park ] 
+
+Sample #2:
+Question: When did the greek orthodox church split from the religious institution located in the city where the creator of The Last Judgment died? 
+H-expression: JOIN [ When did the greek orthodox church split from Ans#2? , JOIN [ In what city did Ans#1 die? , Who is creator of The Last Judgment ] ] 
+
+Sample #3:
+Question: When did the capitol of Virginia move from Robert Banks’ birthplace to the town WTVR-FM is licensed in?
+H-expression: JOIN [ When did the capital of virginia moved from Ans#2 to Ans#1 , UNION [ What town is WTVR-FM liscensed in? , What is place of birth of Robert Banks ] ] 
+
+Sample #4:
+Question: When did the civil war start in the country whose capitol was home to the man after whom Korolyov was named?
+H-expression: JOIN [ When did the civil war in Ans#3 start , JOIN [ Ans#2 is the capital city of which country , JOIN [ What is residence of Ans#1 , Korolyov is named after What ] ] ] 
+ 
+Sample #5:
+Question: When did Muslim armies invade the country containing Al-Mastumah and the country of the man who followed the reign of Al-Mu’tamid?
+H-expression: JOIN [ When did muslim armies invade Ans#3 and Ans#2 , UNION [ What is country of Al-Mastumah , JOIN [ What is country of citizenship of Ans#1 , Al-Mu’tamid is followed by What ] ] ] 
+ 
+Sample #6:
+Question: Which film was released first, Who Is Kissing Me? or Bush Christmas?
+H-expression: COMP < [ What is publication date of And Who Is Kissing Me? , What is publication date of Bush Christmas] 
+
+Sample #7:
+Question: Which film has the director who was born later, Sleepers East or Leaving Fear Behind?
+H-expression: COMP > [ JOIN [ When is date of birth of #3 , Who is director of Sleepers East ] , JOIN [ When is date of birth of #1 , Who is director of Leaving Fear Behind ] ] 
+
+Sample #8:
+Question: Who is the sibling-in-law of Favila Of Asturias?
+H-expression: JOIN [ Who is spouse of #1 , Who is sibling of Favila Of Asturias ] 
+
+Sample #9:
+Question: Where did the founder of University Of Piura die?
+H-expression: JOIN [ Where is #1’s place of death , The Universidad De Piura is founded by Who ] 
+
+
+
+
+{
+    Schema:
+    TABLE department ( Department_ID, Name, Creation, Ranking, Budget_in_Billions, Num_Employees)
+    TABLE head ( head_ID, name, born_state, age )
+    TABLE management (department_ID, head_ID, temporary_acting)
+
+    Question:
+    How many heads of the departments are older than 56 ?
+    
+    QPL Plan:
+    #1 = Scan Table [ head ] Predicate [ age > 56.0 ] Output [ age ]
+    #2 = Aggregate [ #1 ] Output [ countstar AS Count_Star ]
+
+    Natural Language Plan:
+    #1 = Which heads of department have age is more than 56
+    #2 = How many heads of the departments have age more than 56
+
+    
+    "query":"SELECT count ( * ) AS Count_Star FROM department_management.head WITH (FORCESCAN) WHERE age > 56 OPTION (HASH JOIN, ORDER GROUP)",
+    "difficulty":"easy",
+    "qpl":"#1 = Scan Table [ head ] Predicate [ age > 56.0 ] Output [ age ] ; #2 = Aggregate [ #1 ] Output [ countstar AS Count_Star ]",
+    "prefixed_qpl":"department_management | #1 = Scan Table [ head ] Predicate [ age > 56.0 ] Output [ age ] ; #2 = Aggregate [ #1 ] Output [ countstar AS Count_Star ]",
+    "cte":"WITH Scan_1 AS ( SELECT age FROM department_management.head WHERE age > 56.0 ), Aggregate_2 AS ( SELECT COUNT(*) AS Count_Star FROM Scan_1 ) SELECT * FROM Aggregate_2",
+    "clean_query":"SELECT count ( * ) AS Count_Star FROM department_management.head  WHERE age > 56"
+  }
+
+
+  {
+    Schema:
+    TABLE department ( Department_ID, Name, Creation, Ranking, Budget_in_Billions, Num_Employees)
+    TABLE head ( head_ID, name, born_state, age )
+    TABLE management (department_ID, head_ID, temporary_acting)
+
+    Question:
+    Show the name and number of employees for the departments managed by heads whose temporary acting value is 'Yes'?
+
+    QPL Plan:
+    #1 = Scan Table [ management ] Predicate [ temporary_acting = 'Yes' ] Output [ department_ID , temporary_acting ]
+    #2 = Scan Table [ department ] Output [ Num_Employees , Name , Department_ID ]
+    #3 = Join [ #1 , #2 ] Predicate [ #1.department_ID = #2.Department_ID ] Output [ #2.Name , #2.Num_Employees ]
+
+    Natural Language Plan:
+    #1 = Which departments are managed by heads whose temporary acting value is 'Yes'
+    #2 = What is the name of department and number of employees in it for all departments
+    #3 = What is the name and number of employees for the departments managed by heads whose temporary acting value is 'Yes'
+
+    "id":"a755587236ae98ce64932aae821a229a2fa5c22085e4ae14a98c9e2ed37913e1",
+    "db_id":"department_management",
+    Question:
+	"Show the name and number of employees for the departments managed by heads whose temporary acting value is 'Yes'?",
+    "query":"SELECT T1.name , T1.num_employees FROM department_management.department AS T1 WITH (FORCESCAN) JOIN department_management.management AS T2 WITH (FORCESCAN) ON T1.department_id = T2.department_id WHERE T2.temporary_acting = 'Yes' OPTION (HASH JOIN, ORDER GROUP)",
+    "difficulty":"medium",
+    "qpl":"#1 = Scan Table [ management ] Predicate [ temporary_acting = 'Yes' ] Output [ department_ID , temporary_acting ] ; #2 = Scan Table [ department ] Output [ Num_Employees , Name , Department_ID ] ; #3 = Join [ #1 , #2 ] Predicate [ #1.department_ID = #2.Department_ID ] Output [ #2.Name , #2.Num_Employees ]",
+    "prefixed_qpl":"department_management | #1 = Scan Table [ management ] Predicate [ temporary_acting = 'Yes' ] Output [ department_ID , temporary_acting ] ; #2 = Scan Table [ department ] Output [ Num_Employees , Name , Department_ID ] ; #3 = Join [ #1 , #2 ] Predicate [ #1.department_ID = #2.Department_ID ] Output [ #2.Name , #2.Num_Employees ]",
+    "cte":"WITH Scan_1 AS ( SELECT department_ID, temporary_acting FROM department_management.management WHERE temporary_acting = 'Yes' ), Scan_2 AS ( SELECT Num_Employees, Name, Department_ID FROM department_management.department ), Join_3 AS ( SELECT Scan_2.Name, Scan_2.Num_Employees FROM Scan_1 JOIN Scan_2 ON Scan_1.department_ID = Scan_2.Department_ID ) SELECT * FROM Join_3",
+    "clean_query":"SELECT T1.name , T1.num_employees FROM department_management.department AS T1  JOIN department_management.management AS T2  ON T1.department_id = T2.department_id WHERE T2.temporary_acting = 'Yes'"
+  }
+
+  {
+    Schema:
+    TABLE city (City_ID, Official_Name, Status, Area_km_2, Population, Census_Ranking)
+    TABLE farm (Farm_ID, Year, Total_Horses, Working_Horses, Total_Cattle, Oxen, Bulls, Cows, Pigs, Sheep_and_Goats)
+    TABLE farm_competition (Competition_ID, Year, Theme, Host_city_ID, Hosts)
+    TABLE competition_record (Competition_ID, Farm_ID, Rank)
+
+    Question:
+	How many farms are there?
+
+    QPL Plan:
+    #1 = Scan Table [ farm ] Output [ 1 AS One ] ; 
+    #2 = Aggregate [ #1 ] Output [ countstar AS Count_Star ]
+
+    Natural Language Plan:
+    #1 = What farms are there
+    #2 = How many farms are there
+
+
+    "query":"SELECT count ( * ) AS Count_Star FROM farm.farm WITH (FORCESCAN) OPTION (HASH JOIN, ORDER GROUP)",
+    "difficulty":"easy",
+    "qpl":"#1 = Scan Table [ farm ] Output [ 1 AS One ] ; #2 = Aggregate [ #1 ] Output [ countstar AS Count_Star ]",
+    "prefixed_qpl":"farm | #1 = Scan Table [ farm ] Output [ 1 AS One ] ; #2 = Aggregate [ #1 ] Output [ countstar AS Count_Star ]",
+    "cte":"WITH Scan_1 AS ( SELECT 1 AS One FROM farm.farm ), Aggregate_2 AS ( SELECT COUNT(*) AS Count_Star FROM Scan_1 ) SELECT * FROM Aggregate_2",
+    "clean_query":"SELECT count ( * ) AS Count_Star FROM farm.farm"
+  }
+
+  {
+    Schema:
+    TABLE city (City_ID, Official_Name, Status, Area_km_2, Population, Census_Ranking)
+    TABLE farm (Farm_ID, Year, Total_Horses, Working_Horses, Total_Cattle, Oxen, Bulls, Cows, Pigs, Sheep_and_Goats)
+    TABLE farm_competition (Competition_ID, Year, Theme, Host_city_ID, Hosts)
+    TABLE competition_record (Competition_ID, Farm_ID, Rank)
+
+    Question:
+	What are the maximum and minimum number of cows across all farms.
+
+    QPL Plan:
+    #1 = Scan Table [ farm ] Output [ Cows ] ; 
+    #2 = Aggregate [ #1 ] Output [ MAX(Cows) AS Max_Cows , MIN(Cows) AS Min_Cows ]
+
+    Natural Language Plan:
+    #1 = What are the number of cows across all farms
+    #2 = What are the maximum and minimum number of cows across all farms
+
+    "query":"SELECT max ( Cows ) AS Max_Cows , min ( Cows ) AS Min_Cows FROM farm.farm WITH (FORCESCAN) OPTION (HASH JOIN, ORDER GROUP)",
+    "difficulty":"medium",
+    "qpl":"#1 = Scan Table [ farm ] Output [ Cows ] ; #2 = Aggregate [ #1 ] Output [ MAX(Cows) AS Max_Cows , MIN(Cows) AS Min_Cows ]",
+    "prefixed_qpl":"farm | #1 = Scan Table [ farm ] Output [ Cows ] ; #2 = Aggregate [ #1 ] Output [ MAX(Cows) AS Max_Cows , MIN(Cows) AS Min_Cows ]",
+    "cte":"WITH Scan_1 AS ( SELECT Cows FROM farm.farm ), Aggregate_2 AS ( SELECT MAX(Cows) AS Max_Cows, MIN(Cows) AS Min_Cows FROM Scan_1 ) SELECT * FROM Aggregate_2",
+    "clean_query":"SELECT max ( Cows ) AS Max_Cows , min ( Cows ) AS Min_Cows FROM farm.farm"
+  }
+
+  {
+    Schema:
+    TABLE Addresses (address_id, line_1, line_2, city, zip_postcode, state_province_county, country)
+    TABLE People (person_id, first_name, middle_name, last_name, cell_mobile_number, email_address, login_name, password)
+    TABLE Students (student_id, student_details)
+    TABLE Courses (course_id, course_name, course_description)
+    TABLE People_Addresses (person_address_id, person_id, address_id, date_from, date_to)
+    TABLE Student_Course_Registrations (student_id, course_id, registration_date)
+    TABLE Student_Course_Attendance (student_id, course_id, date_of_attendance)
+    TABLE Candidates (candidate_id, candidate_details)
+    TABLE Candidate_Assessments (candidate_id, qualification, assessment_date, asessment_outcome_code)
+
+    Question:
+	"what are the first name and last name of all candidates?",
+    
+    QPL Plan:
+    #1 = Scan Table [ Candidates ] Output [ candidate_id ] ; 
+    #2 = Scan Table [ People ] Output [ last_name , first_name , person_id ] ; 
+    #3 = Join [ #1 , #2 ] Predicate [ #1.candidate_id = #2.person_id ] Output [ #2.last_name , #2.first_name ]
+
+    Natural Language Plan:
+    #1 = What are candidate ids for all candidates
+    #2 = What are last name, first name and person id for all people
+    #3 = What are the last name and first name for all people where candidate id match with person id
+
+    "query":"SELECT T2.first_name , T2.last_name FROM student_assessment.candidates AS T1 WITH (FORCESCAN) JOIN student_assessment.people AS T2 WITH (FORCESCAN) ON T1.candidate_id = T2.person_id OPTION (HASH JOIN, ORDER GROUP)",
+    "difficulty":"medium",
+    "qpl":"#1 = Scan Table [ Candidates ] Output [ candidate_id ] ; #2 = Scan Table [ People ] Output [ last_name , first_name , person_id ] ; #3 = Join [ #1 , #2 ] Predicate [ #1.candidate_id = #2.person_id ] Output [ #2.last_name , #2.first_name ]",
+    "prefixed_qpl":"student_assessment | #1 = Scan Table [ Candidates ] Output [ candidate_id ] ; #2 = Scan Table [ People ] Output [ last_name , first_name , person_id ] ; #3 = Join [ #1 , #2 ] Predicate [ #1.candidate_id = #2.person_id ] Output [ #2.last_name , #2.first_name ]",
+    "cte":"WITH Scan_1 AS ( SELECT candidate_id FROM student_assessment.Candidates ), Scan_2 AS ( SELECT last_name, first_name, person_id FROM student_assessment.People ), Join_3 AS ( SELECT Scan_2.last_name, Scan_2.first_name FROM Scan_1 JOIN Scan_2 ON Scan_1.candidate_id = Scan_2.person_id ) SELECT * FROM Join_3",
+    "clean_query":"SELECT T2.first_name , T2.last_name FROM student_assessment.candidates AS T1  JOIN student_assessment.people AS T2  ON T1.candidate_id = T2.person_id"
+  }
+
+  {
+    Schema:
+    TABLE Addresses (address_id, line_1, line_2, city, zip_postcode, state_province_county, country)
+    TABLE People (person_id, first_name, middle_name, last_name, cell_mobile_number, email_address, login_name, password)
+    TABLE Students (student_id, student_details)
+    TABLE Courses (course_id, course_name, course_description)
+    TABLE People_Addresses (person_address_id, person_id, address_id, date_from, date_to)
+    TABLE Student_Course_Registrations (student_id, course_id, registration_date)
+    TABLE Student_Course_Attendance (student_id, course_id, date_of_attendance)
+    TABLE Candidates (candidate_id, candidate_details)
+    TABLE Candidate_Assessments (candidate_id, qualification, assessment_date, asessment_outcome_code)
+
+    Question:
+	What are the ids of the students who registered for some courses but had the least number of courses for all students?
+
+    QPL Plan:
+    #1 = Scan Table [ Student_Course_Registrations ] Output [ student_id ]
+    #2 = Aggregate [ #1 ] GroupBy [ student_id ] Output [ student_id , countstar AS Count_Star ]
+    #3 = TopSort [ #2 ] Rows [ 1 ] OrderBy [ Count_Star ASC ] Output [ student_id , Count_Star ]
+
+    Natural Language Plan:
+    #1 = What are the courses that have students registered for 
+    #2 = What is the count of courses for each student
+    #3 = What are the ids of the students with least number of courses 
+
+    "query":"SELECT TOP 1 student_id FROM student_assessment.student_course_registrations WITH (FORCESCAN) GROUP BY student_id ORDER BY count ( * ) OPTION (HASH JOIN, ORDER GROUP)",
+    "difficulty":"hard",
+    "qpl":"#1 = Scan Table [ Student_Course_Registrations ] Output [ student_id ] ; #2 = Aggregate [ #1 ] GroupBy [ student_id ] Output [ student_id , countstar AS Count_Star ] ; #3 = TopSort [ #2 ] Rows [ 1 ] OrderBy [ Count_Star ASC ] Output [ student_id , Count_Star ]",
+    "prefixed_qpl":"student_assessment | #1 = Scan Table [ Student_Course_Registrations ] Output [ student_id ] ; #2 = Aggregate [ #1 ] GroupBy [ student_id ] Output [ student_id , countstar AS Count_Star ] ; #3 = TopSort [ #2 ] Rows [ 1 ] OrderBy [ Count_Star ASC ] Output [ student_id , Count_Star ]",
+    "cte":"WITH Scan_1 AS ( SELECT student_id FROM student_assessment.Student_Course_Registrations ), Aggregate_2 AS ( SELECT student_id, COUNT(*) AS Count_Star FROM Scan_1 GROUP BY student_id ), TopSort_3 AS ( SELECT TOP 1 student_id, Count_Star FROM Aggregate_2 ORDER BY Count_Star ASC ) SELECT * FROM TopSort_3",
+    "clean_query":"SELECT TOP 1 student_id FROM student_assessment.student_course_registrations  GROUP BY student_id ORDER BY count ( * )"
+  }
+
+  {
+    Schema:
+    TABLE station ( id, name, lat, long, dock_count, city, installation_date );
+    TABLE status ( station_id, bikes_available, docks_available, time, FOREIGN KEY (station_id) REFERENCES station );
+    TABLE trip ( id, duration, start_date, start_station_id, end_date, end_station_id, bike_id, subscription_type, zip_code );
+    TABLE weather ( date, max_temperature_f, mean_temperature_f, min_temperature_f, max_dew_point_f, mean_dew_point_f, min_dew_point_f, max_humidity, mean_humidity, min_humidity, max_sea_level_pressure_inches, mean_sea_level_pressure_inches, min_sea_level_pressure_inches, max_visibility_miles, mean_visibility_miles, min_visibility_miles, max_wind_Speed_mph, mean_wind_speed_mph, max_gust_speed_mph, precipitation_inches, cloud_cover, events, wind_dir_degrees, zip_code );
+
+    Question:
+	What are the names of all stations with a latitude smaller than 37.5?
+
+    QPL Plan:
+    #1 = Scan Table [ station ] Predicate [ lat < 37.5 ] Output [ name , lat ]
+
+    Natural Language Plan:
+    #1 = What are the names of all stations with a latitude less than 37.5 
+
+    "query":"SELECT name FROM bike_1.station WITH (FORCESCAN) WHERE lat < 37.5 OPTION (HASH JOIN, ORDER GROUP)",
+    "difficulty":"easy",
+    "qpl":"#1 = Scan Table [ station ] Predicate [ lat < 37.5 ] Output [ name , lat ]",
+    "prefixed_qpl":"bike_1 | #1 = Scan Table [ station ] Predicate [ lat < 37.5 ] Output [ name , lat ]",
+    "cte":"WITH Scan_1 AS ( SELECT name, lat FROM bike_1.station WHERE lat < 37.5 ) SELECT * FROM Scan_1",
+    "clean_query":"SELECT name FROM bike_1.station  WHERE lat < 37.5"
+  },
+  {
+    Schema:
+    TABLE station ( id, name, lat, long, dock_count, city, installation_date );
+    TABLE status ( station_id, bikes_available, docks_available, time, FOREIGN KEY (station_id) REFERENCES station );
+    TABLE trip ( id, duration, start_date, start_station_id, end_date, end_station_id, bike_id, subscription_type, zip_code );
+    TABLE weather ( date, max_temperature_f, mean_temperature_f, min_temperature_f, max_dew_point_f, mean_dew_point_f, min_dew_point_f, max_humidity, mean_humidity, min_humidity, max_sea_level_pressure_inches, mean_sea_level_pressure_inches, min_sea_level_pressure_inches, max_visibility_miles, mean_visibility_miles, min_visibility_miles, max_wind_Speed_mph, mean_wind_speed_mph, max_gust_speed_mph, precipitation_inches, cloud_cover, events, wind_dir_degrees, zip_code );
+
+    Question:
+	For each city, return the highest latitude among its stations.
+    
+    QPL Plan:
+    #1 = Scan Table [ station ] Output [ lat , city ] ; 
+    #2 = Aggregate [ #1 ] GroupBy [ city ] Output [ city , MAX(lat) AS Max_lat ]
+
+    Natural Language Plan:
+    #1 = What are the latitude and city for each station
+    #2 = For each city, what is the highest latitude among its stations
+
+    "query":"SELECT city , max ( lat ) AS Max_lat FROM bike_1.station WITH (FORCESCAN) GROUP BY city OPTION (HASH JOIN, ORDER GROUP)",
+    "difficulty":"medium",
+    "qpl":"#1 = Scan Table [ station ] Output [ lat , city ] ; #2 = Aggregate [ #1 ] GroupBy [ city ] Output [ city , MAX(lat) AS Max_lat ]",
+    "prefixed_qpl":"bike_1 | #1 = Scan Table [ station ] Output [ lat , city ] ; #2 = Aggregate [ #1 ] GroupBy [ city ] Output [ city , MAX(lat) AS Max_lat ]",
+    "cte":"WITH Scan_1 AS ( SELECT lat, city FROM bike_1.station ), Aggregate_2 AS ( SELECT city, MAX(lat) AS Max_lat FROM Scan_1 GROUP BY city ) SELECT * FROM Aggregate_2",
+    "clean_query":"SELECT city , max ( lat ) AS Max_lat FROM bike_1.station  GROUP BY city"
+  }
+
+  {
+    Schema:
+    TABLE station ( id, name, lat, long, dock_count, city, installation_date );
+    TABLE status ( station_id, bikes_available, docks_available, time, FOREIGN KEY (station_id) REFERENCES station );
+    TABLE trip ( id, duration, start_date, start_station_id, end_date, end_station_id, bike_id, subscription_type, zip_code );
+    TABLE weather ( date, max_temperature_f, mean_temperature_f, min_temperature_f, max_dew_point_f, mean_dew_point_f, min_dew_point_f, max_humidity, mean_humidity, min_humidity, max_sea_level_pressure_inches, mean_sea_level_pressure_inches, min_sea_level_pressure_inches, max_visibility_miles, mean_visibility_miles, min_visibility_miles, max_wind_Speed_mph, mean_wind_speed_mph, max_gust_speed_mph, precipitation_inches, cloud_cover, events, wind_dir_degrees, zip_code );
+
+    Question:
+	What is the start station and end station for the trips with the three smallest ids?
+
+    QPL Plan:
+    #1 = Scan Table [ trip ] Output [ start_station_name , end_station_name , id ]
+    #2 = Top [ #1 ] Rows [ 3 ] Output [ start_station_name , end_station_name ]
+
+    Natural Language Plan:
+    #1 = What are the start station name, end station name and station id for all stations
+    #2 = What are the start station name, end station name for top 3 stations sorted by station id
+
+
+
+    "id":"0fa3aedf90e60bfdc6b0e855d1e28bc0f6d27e3e0f5ee1f63583f1d2477c9f2f",
+    "db_id":"bike_1",
+    Question:
+	"What is the station station and end station for the trips with the three smallest ids?",
+    "query":"SELECT TOP 3 start_station_name , end_station_name FROM bike_1.trip WITH (FORCESCAN) ORDER BY id OPTION (HASH JOIN, ORDER GROUP)",
+    "difficulty":"medium",
+    "qpl":"#1 = Scan Table [ trip ] Output [ start_station_name , end_station_name , id ] ; #2 = Top [ #1 ] Rows [ 3 ] Output [ start_station_name , end_station_name ]",
+    "prefixed_qpl":"bike_1 | #1 = Scan Table [ trip ] Output [ start_station_name , end_station_name , id ] ; #2 = Top [ #1 ] Rows [ 3 ] Output [ start_station_name , end_station_name ]",
+    "cte":"WITH Scan_1 AS ( SELECT start_station_name, end_station_name, id FROM bike_1.trip ), Top_2 AS ( SELECT TOP 3 start_station_name, end_station_name FROM Scan_1 ) SELECT * FROM Top_2",
+    "clean_query":"SELECT TOP 3 start_station_name , end_station_name FROM bike_1.trip  ORDER BY id"
+  },
+
+  { 
+    Schema:
+    TABLE station ( id, name, lat, long, dock_count, city, installation_date );
+    TABLE status ( station_id, bikes_available, docks_available, time, FOREIGN KEY (station_id) REFERENCES station );
+    TABLE trip ( id, duration, start_date, start_station_id, end_date, end_station_id, bike_id, subscription_type, zip_code );
+    TABLE weather ( date, max_temperature_f, mean_temperature_f, min_temperature_f, max_dew_point_f, mean_dew_point_f, min_dew_point_f, max_humidity, mean_humidity, min_humidity, max_sea_level_pressure_inches, mean_sea_level_pressure_inches, min_sea_level_pressure_inches, max_visibility_miles, mean_visibility_miles, min_visibility_miles, max_wind_Speed_mph, mean_wind_speed_mph, max_gust_speed_mph, precipitation_inches, cloud_cover, events, wind_dir_degrees, zip_code );
+
+    Question:
+	What is the zip code in which the average mean sea level pressure is the lowest?
+
+    QPL Plan:
+    #1 = Scan Table [ weather ] Output [ zip_code , mean_sea_level_pressure_inches ] ; 
+    #2 = Aggregate [ #1 ] GroupBy [ zip_code ] Output [ AVG(mean_sea_level_pressure_inches) AS Avg_mean_sea_level_pressure_inches , zip_code ] 
+    #3 = TopSort [ #2 ] Rows [ 1 ] OrderBy [ Avg_mean_sea_level_pressure_inches ASC ] Output [ Avg_mean_sea_level_pressure_inches , zip_code ]
+
+    Natural Language Plan:
+    #1 = What are the zip code and mean sea level pressure
+    #2 = What is the average mean sea level pressure for each zip code 
+    #3 = What is the zip code in which average mean sea level pressure is lowest
+
+    "id":"cfd4e6878cacf66bf95d2cdb2b0dc1e46645728f569246c2c23a02c0b0044b65",
+    "db_id":"bike_1",
+    Question:
+	"What is the zip code in which the average mean sea level pressure is the lowest?",
+    "query":"SELECT TOP 1 zip_code FROM bike_1.weather WITH (FORCESCAN) GROUP BY zip_code ORDER BY avg ( mean_sea_level_pressure_inches ) OPTION (HASH JOIN, ORDER GROUP)",
+    "difficulty":"hard",
+    "qpl":"#1 = Scan Table [ weather ] Output [ zip_code , mean_sea_level_pressure_inches ] ; #2 = Aggregate [ #1 ] GroupBy [ zip_code ] Output [ AVG(mean_sea_level_pressure_inches) AS Avg_mean_sea_level_pressure_inches , zip_code ] ; #3 = TopSort [ #2 ] Rows [ 1 ] OrderBy [ Avg_mean_sea_level_pressure_inches ASC ] Output [ Avg_mean_sea_level_pressure_inches , zip_code ]",
+    "prefixed_qpl":"bike_1 | #1 = Scan Table [ weather ] Output [ zip_code , mean_sea_level_pressure_inches ] ; #2 = Aggregate [ #1 ] GroupBy [ zip_code ] Output [ AVG(mean_sea_level_pressure_inches) AS Avg_mean_sea_level_pressure_inches , zip_code ] ; #3 = TopSort [ #2 ] Rows [ 1 ] OrderBy [ Avg_mean_sea_level_pressure_inches ASC ] Output [ Avg_mean_sea_level_pressure_inches , zip_code ]",
+    "cte":"WITH Scan_1 AS ( SELECT zip_code, mean_sea_level_pressure_inches FROM bike_1.weather ), Aggregate_2 AS ( SELECT AVG(mean_sea_level_pressure_inches) AS Avg_mean_sea_level_pressure_inches, zip_code FROM Scan_1 GROUP BY zip_code ), TopSort_3 AS ( SELECT TOP 1 Avg_mean_sea_level_pressure_inches, zip_code FROM Aggregate_2 ORDER BY Avg_mean_sea_level_pressure_inches ASC ) SELECT * FROM TopSort_3",
+    "clean_query":"SELECT TOP 1 zip_code FROM bike_1.weather  GROUP BY zip_code ORDER BY avg ( mean_sea_level_pressure_inches )"
+  }
+
+  {
+    Schema:
+    TABLE genre ( g_name, rating, most_popular_in)
+    TABLE artist ( artist_name, country, gender, preferred_genre)
+    TABLE files ( f_id, artist_name, file_size, duration, formats)
+    TABLE song ( song_name, artist_name, country, f_id, genre_is, rating, languages, releasedate, resolution)
+
+    Question:
+	How many Bangladeshi artists are listed?
+
+    QPL Plan:
+    #1 = Scan Table [ artist ] Predicate [ country = 'Bangladesh' ] Output [ country ]
+    #2 = Aggregate [ #1 ] Output [ countstar AS Count_Star ]
+
+    Natural Language Plan:
+    #1 = Who are the Bangladeshi artists
+    #2 = How many Bangladeshi artists are there
+
+
+    "query":"SELECT count ( * ) AS Count_Star FROM music_1.artist WITH (FORCESCAN) WHERE country = 'Bangladesh' OPTION (HASH JOIN, ORDER GROUP)",
+    "difficulty":"easy",
+    "qpl":"#1 = Scan Table [ artist ] Predicate [ country = 'Bangladesh' ] Output [ country ] ; #2 = Aggregate [ #1 ] Output [ countstar AS Count_Star ]",
+    "prefixed_qpl":"music_1 | #1 = Scan Table [ artist ] Predicate [ country = 'Bangladesh' ] Output [ country ] ; #2 = Aggregate [ #1 ] Output [ countstar AS Count_Star ]",
+    "cte":"WITH Scan_1 AS ( SELECT country FROM music_1.artist WHERE country = 'Bangladesh' ), Aggregate_2 AS ( SELECT COUNT(*) AS Count_Star FROM Scan_1 ) SELECT * FROM Aggregate_2",
+    "clean_query":"SELECT count ( * ) AS Count_Star FROM music_1.artist  WHERE country = 'Bangladesh'"
+  },
+
+  {
+    Schema:
+    TABLE genre ( g_name, rating, most_popular_in)
+    TABLE artist ( artist_name, country, gender, preferred_genre)
+    TABLE files ( f_id, artist_name, file_size, duration, formats)
+    TABLE song ( song_name, artist_name, country, f_id, genre_is, rating, languages, releasedate, resolution)
+
+    Question:
+	What is the average rating of songs produced by female artists?
+
+    QPL Plan:
+    #1 = Scan Table [ artist ] Predicate [ gender = 'Female' ] Output [ gender , artist_name ]
+    #2 = Scan Table [ song ] Output [ rating , artist_name ]
+    #3 = Join [ #1 , #2 ] Predicate [ #1.artist_name = #2.artist_name ] Output [ #2.rating ]
+    #4 = Aggregate [ #3 ] Output [ AVG(rating) AS Avg_rating ]
+
+    Natural Language Plan:
+    #1 = Who are the female artists 
+    #2 = What are the ratings of songs and artist name
+    #3 = What are the ratings of songs where artists are female
+    #4 = What is the average rating of songs produced by female artists
+
+    "query":"SELECT avg ( T2.rating ) AS Avg_rating FROM music_1.artist AS T1 WITH (FORCESCAN) JOIN music_1.song AS T2 WITH (FORCESCAN) ON T1.artist_name = T2.artist_name WHERE T1.gender = 'Female' OPTION (HASH JOIN, ORDER GROUP)",
+    "difficulty":"medium",
+    "qpl":"#1 = Scan Table [ artist ] Predicate [ gender = 'Female' ] Output [ gender , artist_name ] ; #2 = Scan Table [ song ] Output [ rating , artist_name ] ; #3 = Join [ #1 , #2 ] Predicate [ #1.artist_name = #2.artist_name ] Output [ #2.rating ] ; #4 = Aggregate [ #3 ] Output [ AVG(rating) AS Avg_rating ]",
+    "prefixed_qpl":"music_1 | #1 = Scan Table [ artist ] Predicate [ gender = 'Female' ] Output [ gender , artist_name ] ; #2 = Scan Table [ song ] Output [ rating , artist_name ] ; #3 = Join [ #1 , #2 ] Predicate [ #1.artist_name = #2.artist_name ] Output [ #2.rating ] ; #4 = Aggregate [ #3 ] Output [ AVG(rating) AS Avg_rating ]",
+    "cte":"WITH Scan_1 AS ( SELECT gender, artist_name FROM music_1.artist WHERE gender = 'Female' ), Scan_2 AS ( SELECT rating, artist_name FROM music_1.song ), Join_3 AS ( SELECT Scan_2.rating FROM Scan_1 JOIN Scan_2 ON Scan_1.artist_name = Scan_2.artist_name ), Aggregate_4 AS ( SELECT AVG(rating) AS Avg_rating FROM Join_3 ) SELECT * FROM Aggregate_4",
+    "clean_query":"SELECT avg ( T2.rating ) AS Avg_rating FROM music_1.artist AS T1  JOIN music_1.song AS T2  ON T1.artist_name = T2.artist_name WHERE T1.gender = 'Female'"
+  }
+
+
+
+  Few_shot_examples = [
+    
+  ]

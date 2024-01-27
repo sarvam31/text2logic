@@ -1,0 +1,64 @@
+
+
+>>>>>>>>>>>>>>>>>>>>Test #1 <<<<<<<<<<<<<<<<<<<<
+Gold answer:
+#1 = What are the names of all stations with a latitude less than 37.5 
+
+Response:
+#1 = What are the names of stations with latitude smaller than 37.5
+
+
+>>>>>>>>>>>>>>>>>>>>Test #2 <<<<<<<<<<<<<<<<<<<<
+Gold answer:
+#1 = Who are the Bangladeshi artists
+#2 = How many Bangladeshi artists are there
+
+Response:
+#1 = Which artists are listed from Bangladesh
+#2 = How many Bangladeshi artists are listed
+
+
+>>>>>>>>>>>>>>>>>>>>Test #3 <<<<<<<<<<<<<<<<<<<<
+Gold answer:
+#1 = What are the latitude and city for each station
+#2 = For each city, what is the highest latitude among its stations
+
+Response:
+#1 = What are the latitude and city for all stations
+#2 = For each city, what is the highest latitude among its stations
+
+
+>>>>>>>>>>>>>>>>>>>>Test #4 <<<<<<<<<<<<<<<<<<<<
+Gold answer:
+#1 = What are the start station name, end station name and station id for all stations
+#2 = What are the start station name, end station name for top 3 stations sorted by station id
+
+Response:
+#1 = What are the start station name, end station name and id for all trips
+#2 = What are the start station and end station for the trips with the three smallest ids
+
+
+>>>>>>>>>>>>>>>>>>>>Test #5 <<<<<<<<<<<<<<<<<<<<
+Gold answer:
+#1 = Who are the female artists 
+#2 = What are the ratings of songs and artist name
+#3 = What are the ratings of songs where artists are female
+#4 = What is the average rating of songs produced by female artists
+
+Response:
+#1 = Which artists are female
+#2 = What is the rating of songs for all artists
+#3 = What is the rating of songs produced by female artists
+#4 = What is the average rating of songs produced by female artists
+
+
+>>>>>>>>>>>>>>>>>>>>Test #6 <<<<<<<<<<<<<<<<<<<<
+Gold answer:
+#1 = What are the zip code and mean sea level pressure
+#2 = What is the average mean sea level pressure for each zip code 
+#3 = What is the zip code in which average mean sea level pressure is lowest
+
+Response:
+#1 = What is the zip code and mean sea level pressure for all weather data
+#2 = What is the average mean sea level pressure for each zip code
+#3 = What is the zip code in which the average mean sea level pressure is the lowest

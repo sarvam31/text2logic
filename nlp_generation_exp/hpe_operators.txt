@@ -1,0 +1,75 @@
+<Operation> 
+JOIN[ q2(Ans#1), q1] 
+<Return Type> 
+Text span
+<Description>
+q2’s execution depends on q1’s answer to replace the placeholder “Ans#1”. Finally returns q2’s answer.
+<Example>
+Question: Where was the birth place of film The Iron Man director?
+H-expression: JOIN[ Where is Ans#1’s place of birth?, Who is director of The Iron Man? ]
+Return: New York
+
+<Operation> 
+UNION[ q2, q1] 
+<Return Type> 
+Dictionary
+<Description>
+Execuates q2 and q1 simultaneously and returns a dictionary as {Ans#1: a1, Ans#2: a2}, where a1/2 is the answer of q1/2. 
+<Example>
+Question: Which state is Horndean located in and what is McDonaldization named after?
+H-expression: UNION[ Which state is Horndean located in?, What is McDonaldization named after? ]
+Return: {Ans#1:McDonald’s , Ans#2:England }
+
+<Operation> 
+AND[ q2, q1] 
+<Return Type> 
+Text spans
+<Description>
+Execuates q2 and q1 simultaneously and returns intersection of q2 and q1’s answers.
+<Example>
+Question: Which former member of the Pittsburgh Pirates was nicknamed “The Cobra”?
+H-expression: AND[ Who is the former member of the Pittsburgh Pirates?, Who was nicknamed “The Cobra”? ]
+Return: Dave Parker
+
+<Operation> 
+COMP_=[ q2, q1 ] 
+<Return Type> 
+Yes/No
+<Description>
+Compare if the answers of q2 and q1 are equal.
+<Example>
+Question: Are North Marion High School (Oregon) and Seoul High School both located in the same country?
+H-expression: COMP_=[ Which is country of North Marion High School (Oregon)?, Which is country of Seoul High School? ] Return: No
+
+<Operation> 
+COMP_<[q2, q1] 
+COMP_>[q2, q1] 
+<Return Type>
+Main Entity in q2/q1
+<Description>
+Compare the answers of q2 and q1 and return the main entity of q2 or q1.
+<Example>
+Question: Which film was came out first, Blind Shaft or The Mask of Fu Manchu?
+H-expression: COMP_<[ When is publication date of Blind Shaft?, When is publication date of The Mask of Fu Manchu? ] Return: The Mask of Fu Manchu
+
+<Operation> 
+SUB[ q2, q1 ] 
+<Return Type>
+Number
+<Description>
+Subtract q2’s numeric answer from q1’s answer.
+<Example>
+Question: How many years does Giuseppe Cesari live?
+H-expression: SUB[ When does Giuseppe Cesari dead?, When does Giuseppe Cesari born? ]
+Return: 72
+
+<Operation> 
+ADD [q2,q1] 
+<Return Type>
+Number
+<Description>
+Add q2’s and q1’s numeric answers.
+<Example>
+Question: How many siblings does Mary Shelley have?
+H-expression: ADD[ How many sisters does Mary Shelley have?, How many brothers does Mary Shelley have? ]
+Return: 4
