@@ -1,3 +1,5 @@
+
+
 >>>>>>>>>>>>>>>>>>>>Test #1 <<<<<<<<<<<<<<<<<<<<
 Input: 
 Schema:
@@ -9,16 +11,17 @@ TABLE weather ( date, max_temperature_f, mean_temperature_f, min_temperature_f, 
 Question:
 What are the names of all stations with a latitude smaller than 37.5?
 
-QPL Plan:
-#1 = Scan Table [ station ] Predicate [ lat < 37.5 ] Output [ name , lat ]
-
 Natural Language Plan:
+#1 = What are the names of all stations with a latitude less than 37.5 
+            
+QPL Plan:
 
 Gold answer:
-#1 = What are the names of all stations with a latitude less than 37.5 
+#1 = Scan Table [ station ] Predicate [ lat < 37.5 ] Output [ name , lat ]
+
 
 LLM Response:
-#1 = What are the names of stations with latitude smaller than 37.5
+#1 = Scan Table [ station ] Predicate [ lat < 37.5 ] Output [ name ]
 
 
 >>>>>>>>>>>>>>>>>>>>Test #2 <<<<<<<<<<<<<<<<<<<<
@@ -32,19 +35,21 @@ TABLE song ( song_name, artist_name, country, f_id, genre_is, rating, languages,
 Question:
 How many Bangladeshi artists are listed?
 
-QPL Plan:
-#1 = Scan Table [ artist ] Predicate [ country = 'Bangladesh' ] Output [ country ]
-#2 = Aggregate [ #1 ] Output [ countstar AS Count_Star ]
-
 Natural Language Plan:
-
-Gold answer:
 #1 = Who are the Bangladeshi artists
 #2 = How many Bangladeshi artists are there
 
+QPL Plan:
+
+Gold answer:
+#1 = Scan Table [ artist ] Predicate [ country = 'Bangladesh' ] Output [ country ]
+#2 = Aggregate [ #1 ] Output [ countstar AS Count_Star ]
+
+
+
 LLM Response:
-#1 = Which artists are listed from Bangladesh
-#2 = How many Bangladeshi artists are listed
+#1 = Scan Table [ artist ] Predicate [ country = 'Bangladesh' ] Output [ artist_name ]
+#2 = Aggregate [ #1 ] Output [ countstar AS Count_Star ]
 
 
 >>>>>>>>>>>>>>>>>>>>Test #3 <<<<<<<<<<<<<<<<<<<<
@@ -58,19 +63,19 @@ TABLE weather ( date, max_temperature_f, mean_temperature_f, min_temperature_f, 
 Question:
 For each city, return the highest latitude among its stations.
 
-QPL Plan:
-#1 = Scan Table [ station ] Output [ lat , city ] ; 
-#2 = Aggregate [ #1 ] GroupBy [ city ] Output [ city , MAX(lat) AS Max_lat ]
-
 Natural Language Plan:
-
-Gold answer:
 #1 = What are the latitude and city for each station
 #2 = For each city, what is the highest latitude among its stations
 
+QPL Plan:
+
+Gold answer:
+#1 = Scan Table [ station ] Output [ lat , city ] ; 
+#2 = Aggregate [ #1 ] GroupBy [ city ] Output [ city , MAX(lat) AS Max_lat
+
 LLM Response:
-#1 = What are the latitude and city for all stations
-#2 = For each city, what is the highest latitude among its stations
+#1 = Scan Table [ station ] Output [ lat , city ]
+#2 = Aggregate [ #1 ] GroupBy [ city ] Output [ city , MAX(lat) AS Max_Latitude ]
 
 
 >>>>>>>>>>>>>>>>>>>>Test #4 <<<<<<<<<<<<<<<<<<<<
@@ -84,19 +89,22 @@ TABLE weather ( date, max_temperature_f, mean_temperature_f, min_temperature_f, 
 Question:
 What is the start station and end station for the trips with the three smallest ids?
 
-QPL Plan:
-#1 = Scan Table [ trip ] Output [ start_station_name , end_station_name , id ]
-#2 = Top [ #1 ] Rows [ 3 ] Output [ start_station_name , end_station_name ]
-
 Natural Language Plan:
-
-Gold answer:
 #1 = What are the start station name, end station name and station id for all stations
 #2 = What are the start station name, end station name for top 3 stations sorted by station id
 
+QPL Plan:
+
+Gold answer:
+#1 = Scan Table [ trip ] Output [ start_station_name , end_station_name , id ]
+#2 = Top [ #1 ] Rows [ 3 ] Output [ start_station_name , end_station_name ]
+
 LLM Response:
-#1 = What are the start station name, end station name and id for all trips
-#2 = What are the start station and end station for the trips with the three smallest ids
+#1 = Scan Table [ station ] Output [ name , id ]
+#2 = Scan Table [ trip ] Output [ start_station_id , end_station_id , id ]
+#3 = Join [ #1 , #2 ] Predicate [ #1.id = #2.start_station_id ] Output [ #1.name AS Start_Station , #1.id AS Start_Station_ID , #2.end_station_id , #2.id ]
+#4 = Join [ #3 , #1 ] Predicate [ #3.end_station_id = #1.id ] Output [ #3.Start_Station , #3.Start_Station_ID , #1.name AS End_Station , #3.id AS Trip_ID ]
+#5 = TopSort [ #4 ] Rows [ 3 ] OrderBy [ #4.Trip_ID ASC ] Output [ #4.Start_Station , #4.End_Station ]
 
 
 >>>>>>>>>>>>>>>>>>>>Test #5 <<<<<<<<<<<<<<<<<<<<
@@ -110,25 +118,25 @@ TABLE song ( song_name, artist_name, country, f_id, genre_is, rating, languages,
 Question:
 What is the average rating of songs produced by female artists?
 
-QPL Plan:
-#1 = Scan Table [ artist ] Predicate [ gender = 'Female' ] Output [ gender , artist_name ]
-#2 = Scan Table [ song ] Output [ rating , artist_name ]
-#3 = Join [ #1 , #2 ] Predicate [ #1.artist_name = #2.artist_name ] Output [ #2.rating ]
-#4 = Aggregate [ #3 ] Output [ AVG(rating) AS Avg_rating ]
-
 Natural Language Plan:
-
-Gold answer:
 #1 = Who are the female artists 
 #2 = What are the ratings of songs and artist name
 #3 = What are the ratings of songs where artists are female
 #4 = What is the average rating of songs produced by female artists
 
+QPL Plan:
+
+Gold answer:
+#1 = Scan Table [ artist ] Predicate [ gender = 'Female' ] Output [ gender , artist_name ]
+#2 = Scan Table [ song ] Output [ rating , artist_name ]
+#3 = Join [ #1 , #2 ] Predicate [ #1.artist_name = #2.artist_name ] Output [ #2.rating ]
+#4 = Aggregate [ #3 ] Output [ AVG(rating) AS Avg_rating ]
+
 LLM Response:
-#1 = Which artists are female
-#2 = What is the rating of songs for all artists
-#3 = What is the rating of songs produced by female artists
-#4 = What is the average rating of songs produced by female artists
+#1 = Scan Table [ artist ] Predicate [ gender = 'female' ] Output [ artist_name ]
+#2 = Scan Table [ song ] Output [ rating , artist_name ]
+#3 = Join [ #1 , #2 ] Predicate [ #1.artist_name = #2.artist_name ] Output [ #2.rating ]
+#4 = Aggregate [ #3 ] Output [ avg(rating) AS Average_Rating ]
 
 
 >>>>>>>>>>>>>>>>>>>>Test #6 <<<<<<<<<<<<<<<<<<<<
@@ -142,19 +150,19 @@ TABLE weather ( date, max_temperature_f, mean_temperature_f, min_temperature_f, 
 Question:
 What is the zip code in which the average mean sea level pressure is the lowest?
 
-QPL Plan:
-#1 = Scan Table [ weather ] Output [ zip_code , mean_sea_level_pressure_inches ] ; 
-#2 = Aggregate [ #1 ] GroupBy [ zip_code ] Output [ AVG(mean_sea_level_pressure_inches) AS Avg_mean_sea_level_pressure_inches , zip_code ] 
-#3 = TopSort [ #2 ] Rows [ 1 ] OrderBy [ Avg_mean_sea_level_pressure_inches ASC ] Output [ Avg_mean_sea_level_pressure_inches , zip_code ]
-
 Natural Language Plan:
-
-Gold answer:
 #1 = What are the zip code and mean sea level pressure
 #2 = What is the average mean sea level pressure for each zip code 
 #3 = What is the zip code in which average mean sea level pressure is lowest
 
+QPL Plan:
+
+Gold answer:
+#1 = Scan Table [ weather ] Output [ zip_code , mean_sea_level_pressure_inches ] ; 
+#2 = Aggregate [ #1 ] GroupBy [ zip_code ] Output [ AVG(mean_sea_level_pressure_inches) AS Avg_mean_sea_level_pressure_inches , zip_code ] 
+#3 = TopSort [ #2 ] Rows [ 1 ] OrderBy [ Avg_mean_sea_level_pressure_inches ASC ] Output [ Avg_mean_sea_level_pressure_inches , zip_code ]
+
 LLM Response:
-#1 = What is the zip code and mean sea level pressure for all weather data
-#2 = What is the average mean sea level pressure for each zip code
-#3 = What is the zip code in which the average mean sea level pressure is the lowest
+#1 = Scan Table [ weather ] Output [ zip_code , mean_sea_level_pressure_inches ]
+#2 = Aggregate [ #1 ] GroupBy [ zip_code ] Output [ zip_code , AVG(mean_sea_level_pressure_inches) AS Avg_Mean_Sea_Level_Pressure ]
+#3 = TopSort [ #2 ] Rows [ 1 ] OrderBy [ Avg_Mean_Sea_Level_Pressure ASC ] Output [ zip_code ]
