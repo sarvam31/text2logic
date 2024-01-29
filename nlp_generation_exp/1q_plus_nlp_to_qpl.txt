@@ -5,7 +5,7 @@ Input:
 Schema:
 TABLE station ( id, name, lat, long, dock_count, city, installation_date );
 TABLE status ( station_id, bikes_available, docks_available, time, FOREIGN KEY (station_id) REFERENCES station );
-TABLE trip ( id, duration, start_date, start_station_id, end_date, end_station_id, bike_id, subscription_type, zip_code );
+TABLE trip ( id, duration, start_date, start_station_name, start_station_id, end_date, end_station_name, end_station_id, bike_id, subscription_type, zip_code );
 TABLE weather ( date, max_temperature_f, mean_temperature_f, min_temperature_f, max_dew_point_f, mean_dew_point_f, min_dew_point_f, max_humidity, mean_humidity, min_humidity, max_sea_level_pressure_inches, mean_sea_level_pressure_inches, min_sea_level_pressure_inches, max_visibility_miles, mean_visibility_miles, min_visibility_miles, max_wind_Speed_mph, mean_wind_speed_mph, max_gust_speed_mph, precipitation_inches, cloud_cover, events, wind_dir_degrees, zip_code );
 
 Question:
@@ -57,7 +57,7 @@ Input:
 Schema:
 TABLE station ( id, name, lat, long, dock_count, city, installation_date );
 TABLE status ( station_id, bikes_available, docks_available, time, FOREIGN KEY (station_id) REFERENCES station );
-TABLE trip ( id, duration, start_date, start_station_id, end_date, end_station_id, bike_id, subscription_type, zip_code );
+TABLE trip ( id, duration, start_date, start_station_name, start_station_id, end_date, end_station_name, end_station_id, bike_id, subscription_type, zip_code );
 TABLE weather ( date, max_temperature_f, mean_temperature_f, min_temperature_f, max_dew_point_f, mean_dew_point_f, min_dew_point_f, max_humidity, mean_humidity, min_humidity, max_sea_level_pressure_inches, mean_sea_level_pressure_inches, min_sea_level_pressure_inches, max_visibility_miles, mean_visibility_miles, min_visibility_miles, max_wind_Speed_mph, mean_wind_speed_mph, max_gust_speed_mph, precipitation_inches, cloud_cover, events, wind_dir_degrees, zip_code );
 
 Question:
@@ -75,7 +75,7 @@ Gold answer:
 
 LLM Response:
 #1 = Scan Table [ station ] Output [ lat , city ]
-#2 = Aggregate [ #1 ] GroupBy [ city ] Output [ city , MAX(lat) AS Max_Latitude ]
+#2 = Aggregate [ #1 ] GroupBy [ city ] Output [ city , MAX(lat) AS Highest_Latitude ]
 
 
 >>>>>>>>>>>>>>>>>>>>Test #4 <<<<<<<<<<<<<<<<<<<<
@@ -83,15 +83,15 @@ Input:
 Schema:
 TABLE station ( id, name, lat, long, dock_count, city, installation_date );
 TABLE status ( station_id, bikes_available, docks_available, time, FOREIGN KEY (station_id) REFERENCES station );
-TABLE trip ( id, duration, start_date, start_station_id, end_date, end_station_id, bike_id, subscription_type, zip_code );
+TABLE trip ( id, duration, start_date, start_station_name, start_station_id, end_date, end_station_name, end_station_id, bike_id, subscription_type, zip_code );
 TABLE weather ( date, max_temperature_f, mean_temperature_f, min_temperature_f, max_dew_point_f, mean_dew_point_f, min_dew_point_f, max_humidity, mean_humidity, min_humidity, max_sea_level_pressure_inches, mean_sea_level_pressure_inches, min_sea_level_pressure_inches, max_visibility_miles, mean_visibility_miles, min_visibility_miles, max_wind_Speed_mph, mean_wind_speed_mph, max_gust_speed_mph, precipitation_inches, cloud_cover, events, wind_dir_degrees, zip_code );
 
 Question:
 What is the start station and end station for the trips with the three smallest ids?
 
 Natural Language Plan:
-#1 = What are the start station name, end station name and station id for all stations
-#2 = What are the start station name, end station name for top 3 stations sorted by station id
+#1 = What are the start station name, end station name and trip id for all trips
+#2 = What are the start station name, end station name for top 3 stations sorted by id
 
 QPL Plan:
 
@@ -100,11 +100,8 @@ Gold answer:
 #2 = Top [ #1 ] Rows [ 3 ] Output [ start_station_name , end_station_name ]
 
 LLM Response:
-#1 = Scan Table [ station ] Output [ name , id ]
-#2 = Scan Table [ trip ] Output [ start_station_id , end_station_id , id ]
-#3 = Join [ #1 , #2 ] Predicate [ #1.id = #2.start_station_id ] Output [ #1.name AS Start_Station , #1.id AS Start_Station_ID , #2.end_station_id , #2.id ]
-#4 = Join [ #3 , #1 ] Predicate [ #3.end_station_id = #1.id ] Output [ #3.Start_Station , #3.Start_Station_ID , #1.name AS End_Station , #3.id AS Trip_ID ]
-#5 = TopSort [ #4 ] Rows [ 3 ] OrderBy [ #4.Trip_ID ASC ] Output [ #4.Start_Station , #4.End_Station ]
+#1 = Scan Table [ trip ] Output [ start_station_name , end_station_name , id ]
+#2 = TopSort [ #1 ] Rows [ 3 ] OrderBy [ id ASC ] Output [ start_station_name , end_station_name ]
 
 
 >>>>>>>>>>>>>>>>>>>>Test #5 <<<<<<<<<<<<<<<<<<<<
@@ -144,7 +141,7 @@ Input:
 Schema:
 TABLE station ( id, name, lat, long, dock_count, city, installation_date );
 TABLE status ( station_id, bikes_available, docks_available, time, FOREIGN KEY (station_id) REFERENCES station );
-TABLE trip ( id, duration, start_date, start_station_id, end_date, end_station_id, bike_id, subscription_type, zip_code );
+TABLE trip ( id, duration, start_date, start_station_name, start_station_id, end_date, end_station_name, end_station_id, bike_id, subscription_type, zip_code );
 TABLE weather ( date, max_temperature_f, mean_temperature_f, min_temperature_f, max_dew_point_f, mean_dew_point_f, min_dew_point_f, max_humidity, mean_humidity, min_humidity, max_sea_level_pressure_inches, mean_sea_level_pressure_inches, min_sea_level_pressure_inches, max_visibility_miles, mean_visibility_miles, min_visibility_miles, max_wind_Speed_mph, mean_wind_speed_mph, max_gust_speed_mph, precipitation_inches, cloud_cover, events, wind_dir_degrees, zip_code );
 
 Question:
